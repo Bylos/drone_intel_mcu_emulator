@@ -9,10 +9,15 @@
 #define __MCU_TYPES_H
 
 typedef enum {
-	MCU_MODE_BOOT		= -1,
-	MCU_MODE_UNARMED	= 0,
+	MCU_MODE_BOOT		= 255,
+	MCU_MODE_STANDBY	= 0,
 	MCU_MODE_ALEXKIDD	= 1,
-	MCU_MODE_ARMED		= 2,
+	MCU_MODE_ACCEL_CAL	= 2,
+	MCU_MODE_GYRO_CAL	= 3,
+	MCU_MODE_MAGN_CAL	= 4,
+	MCU_MODE_ALEXKIDD2	= 5,
+	MCU_MODE_ACRO		= 6,
+	MCU_MODE_STABILIZED	= 7,
 } mcu_mode_t;
 
 /* Convenient structure types for inertial data, size is 18 bytes */

@@ -13,6 +13,6 @@
 #include "drivers.h"
 
 void Mode_AlexKidd_Init(void);
-mcu_mode_t Mode_AlexKidd_Run(cpu_mode_t cpu_mode);
+void Mode_AlexKidd_Run(cpu_state_t cpu_state);
 
 #endif /* MODE_ALEXKIDD_H_ */

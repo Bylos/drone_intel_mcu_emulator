@@ -13,6 +13,6 @@
 #include "drivers.h"
 
 void Mode_Unarmed_Init(void);
-mcu_mode_t Mode_Unarmed_Run(cpu_mode_t cpu_mode);
+void Mode_Unarmed_Run(cpu_state_t cpu_state);
 
 #endif /* MODE_UNARMED_H_ */

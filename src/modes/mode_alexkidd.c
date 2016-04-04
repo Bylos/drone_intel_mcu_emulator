@@ -15,12 +15,11 @@ void Mode_AlexKidd_Init(void) {
 	printf(" ---> Entering Alex Kidd State\n");
 }
 
-mcu_mode_t Mode_AlexKidd_Run(cpu_mode_t cpu_mode) {
-	mcu_mode_t next_mode = MCU_MODE_ALEXKIDD;
+void Mode_AlexKidd_Run(cpu_state_t cpu_state) {
 	/* Check for new sensors values */
 	if (lsm_get_inertial_flag()) {
 		/* Send to CPU */
-		if (cpu_mode != CPU_MODE_UNKNOWN) {
+		if (cpu_state != CPU_DISCONNECTED) {
 			cpu_send_inertial(lsm_get_inertial_data());
 		}
 	}
@@ -29,7 +28,7 @@ mcu_mode_t Mode_AlexKidd_Run(cpu_mode_t cpu_mode) {
 		// Get them
 		joystick_t joystick = xbee_get_joystick_data();
 		/* Send to CPU */
-		if (cpu_mode != CPU_MODE_UNKNOWN) {
+		if (cpu_state != CPU_DISCONNECTED) {
 			cpu_send_joystick(xbee_get_joystick_data());
 		}
 		// Then play with motors

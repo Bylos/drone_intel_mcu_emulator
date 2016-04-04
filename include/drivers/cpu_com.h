@@ -31,10 +31,9 @@ typedef enum {
 
 /* List of CPU modes */
 typedef enum {
-	CPU_MODE_UNKNOWN = -1,
-	CPU_MODE_UNARMED = 0,
-	CPU_MODE_ARMED = 1,	// etc.
-} cpu_mode_t;
+	CPU_DISCONNECTED = 0,
+	CPU_CONNECTED = 1,
+} cpu_state_t;
 
 void cpu_init(void);
 

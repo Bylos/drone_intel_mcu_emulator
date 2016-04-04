@@ -12,7 +12,7 @@
 #include "modes.h"
 #include "drivers.h"
 
-void Mode_Armed_Init(void);
-mcu_mode_t Mode_Armed_Run(cpu_mode_t cpu_mode);
+void Mode_Armed_Init(unsigned char mode);
+void Mode_Armed_Run(cpu_state_t cpu_state);
 
 #endif /* MODE_UNARMED_H_ */
