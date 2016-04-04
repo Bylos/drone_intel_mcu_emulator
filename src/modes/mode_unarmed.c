@@ -40,15 +40,4 @@ void Mode_Unarmed_Run(cpu_state_t cpu_state) {
 		cpu_get_esc_pwm_data();
 	}
 
-	/* Check for mode request */
-	if (xbee_get_command_flag()) {
-		switch (xbee_get_command()) {
-		case RC_COMMAND_ALEXKIDD:
-			next_mode = MCU_MODE_ALEXKIDD;
-			break;
-		default:
-			break;
-		}
-	}
-	return next_mode;
 }

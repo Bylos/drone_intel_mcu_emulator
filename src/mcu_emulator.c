@@ -22,7 +22,7 @@ unsigned long time_ms(unsigned char reset) {
 
 /* State Machine Variables */
 mcu_mode_t mcu_mode = MCU_MODE_BOOT;
-mcu_mode_t mcu_next_mode = MCU_MODE_UNARMED;
+mcu_mode_t mcu_next_mode = MCU_MODE_STANDBY;
 
 
 
@@ -116,7 +116,7 @@ int main() {
 	printf("\nEnd of initialization %d ms\n\n", (unsigned int)(time_ms(0) - cur_time));
 
 	/* CPU Mode Status */
-	cpu_mode_t cpu_mode = CPU_MODE_UNKNOWN;
+	cpu_state_t cpu_state = CPU_DISCONNECTED;
 
 	/* Debug: log number of frames from peripherals */
 	unsigned int cpu_cnt, xbee_cnt, lsm_cnt, adv_cnt;
@@ -143,60 +143,64 @@ int main() {
 			lsm_cnt ++;
 		}
 
-		/* Check for new controller frame */
-		switch (MCU_Get_Controller_Data(cur_time)) {
-		case -1:
-			mcu_next_mode = MCU_MODE_UNARMED;
-			break;
-		case 1:
-			xbee_cnt ++;
-			break;
-		}
-
-		/* Check for new esc pwm values */
+		/* Check for cpu advertizing */
 		switch (MCU_Get_Processor_Data(cur_time)) {
 		case -1:
-			cpu_mode = CPU_MODE_UNKNOWN;
-			if (mcu_mode > MCU_MODE_ALEXKIDD) {
-				mcu_next_mode = MCU_MODE_UNARMED;
+			cpu_state = CPU_DISCONNECTED;
+			if (mcu_mode != MCU_MODE_BOOT && mcu_mode > MCU_MODE_ALEXKIDD) {
+				mcu_next_mode = MCU_MODE_STANDBY;
 			}
 			break;
 		case 1:
 			cpu_cnt ++;
+			cpu_state = CPU_CONNECTED;
 			if (cpu_get_mode_flag()) {
-				cpu_mode = cpu_get_mode_data();
-				if (cpu_mode > CPU_MODE_UNARMED) {
-					mcu_next_mode = MCU_MODE_ARMED;
-				}
-				else if (mcu_mode > MCU_MODE_ALEXKIDD) {
-					mcu_next_mode = MCU_MODE_UNARMED;
-				}
+				mcu_next_mode = cpu_get_mode_data();
 			}
 			break;
 		}
 
-		/* Send state to controller */
-		if (MCU_Advert(cur_time)) {
-			adv_cnt ++;
+		/* Check for new controller frame */
+		switch (MCU_Get_Controller_Data(cur_time)) {
+		case -1:
+			if (cpu_state == CPU_CONNECTED) {
+				cpu_send_command(MCU_MODE_STANDBY);
+			}
+			mcu_next_mode = MCU_MODE_STANDBY;
+			break;
+		case 1:
+			xbee_cnt ++;
+			if (xbee_get_command_flag()) {
+				rc_command_t command = xbee_get_command();
+				if (cpu_state == CPU_CONNECTED) {
+					cpu_send_command(command);
+				}
+				else if (command == RC_COMMAND_UNARM || command == RC_COMMAND_ALEXKIDD) {
+					mcu_next_mode = command;
+				}
+			}
+			break;
 		}
 
 		/* Change and init mode if needed */
 		if (mcu_mode != mcu_next_mode) {
 			mcu_mode = mcu_next_mode;
 			switch (mcu_mode) {
-			case MCU_MODE_UNARMED:
+			case MCU_MODE_STANDBY:
 				Mode_Unarmed_Init();
 				break;
 			case MCU_MODE_ALEXKIDD:
 				Mode_AlexKidd_Init();
 				break;
-			case MCU_MODE_ARMED:
-				Mode_Armed_Init();
+			case MCU_MODE_ACCEL_CAL:
+			case MCU_MODE_GYRO_CAL:
+			case MCU_MODE_MAGN_CAL:
+			case MCU_MODE_ALEXKIDD2:
+			case MCU_MODE_ACRO:
+			case MCU_MODE_STABILIZED:
+				Mode_Armed_Init(mcu_mode);
 				break;
-			default :	// Should not be here anyhow
-				mcu_next_mode = MCU_MODE_UNARMED;
-				mcu_mode = MCU_MODE_UNARMED;
-				Mode_Unarmed_Init();
+			default:
 				break;
 			}
 			xbee_advertize(mcu_mode);
@@ -204,17 +208,27 @@ int main() {
 
 		/* Execute mode process */
 		switch (mcu_mode) {
-		case MCU_MODE_UNARMED:
-			mcu_next_mode = Mode_Unarmed_Run(cpu_mode);
+		case MCU_MODE_STANDBY:
+			Mode_Unarmed_Run(cpu_state);
 			break;
 		case MCU_MODE_ALEXKIDD:
-			mcu_next_mode = Mode_AlexKidd_Run(cpu_mode);
+			Mode_AlexKidd_Run(cpu_state);
 			break;
-		case MCU_MODE_ARMED:
-			mcu_next_mode = Mode_Armed_Run(cpu_mode);
+		case MCU_MODE_ACCEL_CAL:
+		case MCU_MODE_GYRO_CAL:
+		case MCU_MODE_MAGN_CAL:
+		case MCU_MODE_ALEXKIDD2:
+		case MCU_MODE_ACRO:
+		case MCU_MODE_STABILIZED:
+			Mode_Armed_Run(cpu_state);
 			break;
 		default :
 			break;
+		}
+
+		/* Send state to controller */
+		if (MCU_Advert(cur_time)) {
+			adv_cnt ++;
 		}
 	}
 

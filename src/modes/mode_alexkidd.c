@@ -63,24 +63,4 @@ void Mode_AlexKidd_Run(cpu_state_t cpu_state) {
 		/* Do nothing but clear data */
 		cpu_get_esc_pwm_data();
 	}
-	/* Check for mode request */
-	if (xbee_get_command_flag()) {
-		uint8_t command = xbee_get_command();
-		switch (command) {
-		case RC_COMMAND_UNARM:
-			next_mode = MCU_MODE_UNARMED;
-			break;
-		case RC_COMMAND_ALEXKIDD:
-			break;
-		default:
-			if (cpu_mode != CPU_MODE_UNKNOWN) {
-				cpu_send_command(command);
-			}
-			else {
-				printf("MODE: Can't arm requested mode, CPU state is unknown\n");
-			}
-			break;
-		}
-	}
-	return next_mode;
 }

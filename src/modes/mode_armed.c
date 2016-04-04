@@ -35,19 +35,9 @@ void Mode_Armed_Run(cpu_state_t cpu_state) {
 		/* Feed motors */
 		esc_pwm_t pwm = cpu_get_esc_pwm_data();
 		pca_channel_0_3(
-				pwm.front_left,
-				pwm.front_right,
-				pwm.rear_right,
-				pwm.rear_left);
+				pwm.front_left + PCA_ONE_SHOT_1526_HZ_OFFSET,
+				pwm.front_right + PCA_ONE_SHOT_1526_HZ_OFFSET,
+				pwm.rear_right + PCA_ONE_SHOT_1526_HZ_OFFSET,
+				pwm.rear_left + PCA_ONE_SHOT_1526_HZ_OFFSET);
 	}
-	/* Check for mode request */
-	if (xbee_get_command_flag()) {
-		uint8_t command = xbee_get_command();
-		switch (command) {
-		default:
-			cpu_send_command(command);
-			break;
-		}
-	}
-	return next_mode;
 }
