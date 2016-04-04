@@ -6,6 +6,7 @@
 #include <errno.h>			// errno
 #include <string.h>			// memset()
 #include <sys/ioctl.h>		// ioctl(FIONREAD)
+#include <fcntl.h>			// O_RDWR O_NDELAY O_NOCTTY
 #include "drivers.h"
 
 const char *uart_file = "/dev/ttyMFD1";
