@@ -3,7 +3,7 @@
  */
 
 #include "drivers.h"
-
+#include <mraa.h>
 static mraa_i2c_context i2c = NULL;
 
 /**
@@ -117,9 +117,9 @@ void lsm_init() {
 		printf("LSM9DS0: Failed to init i2c bus %d\n", i2c_bus);
 		return;
 	}
-	lsm_gyro_start(G_SCALE_500DPS, G_ODR_380_BW_20);
+	lsm_gyro_start(G_SCALE_500DPS, G_ODR_190_BW_25);
 	lsm_accel_start(A_SCALE_4G, A_ODR_400, A_ABW_50);
-	lsm_magn_start(M_SCALE_2GS, M_ODR_12_5);
+	lsm_magn_start(M_SCALE_2GS, M_ODR_100);
 
 	nanosleep((const struct timespec[]){{0, 500000000L}}, NULL); // Wait 500ms for sensors to wake-up
 }
