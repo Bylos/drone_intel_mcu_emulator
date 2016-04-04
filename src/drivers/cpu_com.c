@@ -105,12 +105,12 @@ unsigned char cpu_read_frame(void) {
 						/* check frame type */
 						switch (buffer[i+3]) {
 						case CPU_FRAME_MODE:
-							cpu_mode = buffer[4];
+							cpu_mode = buffer[i+4];
 							cpu_mode_flag = 1;
 							valid_frame = 1;
 							break;
 						case CPU_FRAME_ESC:
-							cpu_esc_pwm = *(esc_pwm_t *)(buffer+4);
+							cpu_esc_pwm = *(esc_pwm_t *)(buffer+i+4);
 							cpu_esc_pwm_flag = 1;
 							valid_frame = 1;
 							break;
